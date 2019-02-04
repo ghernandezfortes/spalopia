@@ -47,10 +47,16 @@
         methods: {
             // solicitamos los horarios segun las fechas que nos han proporcionado
             async getSchedules() {
+                this.setError(false, '')
                 this.date_start = this.formatDate(this.date_start, 'YYYY-MM-DD')
                 this.date_end =  this.formatDate(this.date_end, 'YYYY-MM-DD')
-                this.setError(false, '')
-                this.schedules = null;
+
+                if (this.date_start > this.date_end) {
+                    this.error.status = true;
+                    this.error.message = 'Start date greater than the end date';
+                    return null;
+                }
+                this.schedules = null
                 axios({
                     method: 'get',
                     url: this.urlGetSchedulesByDay,

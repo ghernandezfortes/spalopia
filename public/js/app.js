@@ -2013,6 +2013,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
+//
+//
 // imports
  // componente vue para renderizar un timepicker
 
@@ -2029,12 +2031,12 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     return {
       urlsendReservation: 'http://localhost:8000/api/sendReservation',
       hour_start: {
-        HH: "",
-        mm: ""
+        HH: "08",
+        mm: "00"
       },
       hour_end: {
-        HH: "",
-        mm: ""
+        HH: "09",
+        mm: "00"
       },
       reservation: {
         date: null,
@@ -2050,9 +2052,9 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         status: false,
         message: ''
       },
-      sent: false,
       success: false,
-      successMessage: ''
+      successMessage: '',
+      sent: false
     };
   },
   methods: {
@@ -2069,6 +2071,16 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
               case 0:
                 this.formatHours();
                 this.reservation.date = this.formatDate(this.reservation.date);
+
+                if (!this.checkDataForm()) {
+                  _context.next = 5;
+                  break;
+                }
+
+                this.error.status = true;
+                return _context.abrupt("return", null);
+
+              case 5:
                 axios({
                   method: 'get',
                   url: this.urlsendReservation,
@@ -2092,7 +2104,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                   _this.setError(true, response);
                 });
 
-              case 3:
+              case 6:
               case "end":
                 return _context.stop();
             }
@@ -2124,6 +2136,28 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     setError: function setError(status, message) {
       this.error.status = status;
       this.error.message = message;
+    },
+    checkDataForm: function checkDataForm() {
+      var result = false;
+      this.error.message = '';
+
+      if (this.reservation.customer_name == null) {
+        result = true;
+        this.error.message = 'Fill customer name';
+      }
+
+      if (this.reservation.service_id == null) {
+        result = true;
+        this.error.message = 'Invalid Service';
+      }
+
+      if (this.reservation.date == null || this.reservation.date == 'Invalid date') {
+        result = true;
+        this.error.message = 'Invalid date';
+      }
+
+      this.error.status = true;
+      return result;
     }
   },
   components: {
@@ -2215,9 +2249,20 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
+                this.setError(false, '');
                 this.date_start = this.formatDate(this.date_start, 'YYYY-MM-DD');
                 this.date_end = this.formatDate(this.date_end, 'YYYY-MM-DD');
-                this.setError(false, '');
+
+                if (!(this.date_start > this.date_end)) {
+                  _context.next = 7;
+                  break;
+                }
+
+                this.error.status = true;
+                this.error.message = 'Start date greater than the end date';
+                return _context.abrupt("return", null);
+
+              case 7:
                 this.schedules = null;
                 axios({
                   method: 'get',
@@ -2241,7 +2286,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                   _this.setError(true, response);
                 });
 
-              case 5:
+              case 9:
               case "end":
                 return _context.stop();
             }
@@ -57434,155 +57479,9 @@ var render = function() {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c("div", { staticClass: "card" }, [
-    !_vm.sent
-      ? _c("div", { staticClass: "card-body" }, [
-          _c("div", { staticClass: "row" }, [
-            _c(
-              "div",
-              { staticClass: "col-12 col-lg-4" },
-              [
-                _c("label", [_vm._v("Date End:")]),
-                _vm._v(" "),
-                _c("datepicker", {
-                  model: {
-                    value: _vm.reservation.date,
-                    callback: function($$v) {
-                      _vm.$set(_vm.reservation, "date", $$v)
-                    },
-                    expression: "reservation.date"
-                  }
-                })
-              ],
-              1
-            ),
-            _vm._v(" "),
-            _c(
-              "div",
-              { staticClass: "col-6 col-lg-4" },
-              [
-                _c("label", { staticClass: "col-12" }, [_vm._v("Hour Start:")]),
-                _vm._v(" "),
-                _c("vue-timepicker", {
-                  attrs: { format: "HH:mm", "minute-interval": 60 },
-                  model: {
-                    value: _vm.hour_start,
-                    callback: function($$v) {
-                      _vm.hour_start = $$v
-                    },
-                    expression: "hour_start"
-                  }
-                })
-              ],
-              1
-            ),
-            _vm._v(" "),
-            _c(
-              "div",
-              { staticClass: "col-6 col-lg-4" },
-              [
-                _c("label", { staticClass: "col-12" }, [_vm._v("Hour End:")]),
-                _vm._v(" "),
-                _c("vue-timepicker", {
-                  attrs: { format: "HH:mm", "minute-interval": 60 },
-                  model: {
-                    value: _vm.hour_end,
-                    callback: function($$v) {
-                      _vm.hour_end = $$v
-                    },
-                    expression: "hour_end"
-                  }
-                })
-              ],
-              1
-            ),
-            _vm._v(" "),
-            _c(
-              "div",
-              { staticClass: "col-12" },
-              [
-                _c("label", { staticClass: "col-12" }, [_vm._v("Service")]),
-                _vm._v(" "),
-                _c("dropdown", {
-                  attrs: { services: _vm.services },
-                  on: { sendItem: _vm.getService }
-                })
-              ],
-              1
-            ),
-            _vm._v(" "),
-            _c("div", { staticClass: "col-12" }, [
-              _c("label", { staticClass: "col-12" }, [
-                _vm._v("Customer Name:")
-              ]),
-              _vm._v(" "),
-              _c("input", {
-                directives: [
-                  {
-                    name: "model",
-                    rawName: "v-model",
-                    value: _vm.reservation.customer_name,
-                    expression: "reservation.customer_name"
-                  }
-                ],
-                staticClass: "form-control",
-                attrs: { type: "text" },
-                domProps: { value: _vm.reservation.customer_name },
-                on: {
-                  input: function($event) {
-                    if ($event.target.composing) {
-                      return
-                    }
-                    _vm.$set(
-                      _vm.reservation,
-                      "customer_name",
-                      $event.target.value
-                    )
-                  }
-                }
-              })
-            ]),
-            _vm._v(" "),
-            _c("div", { staticClass: "col-12" }, [
-              _c("label", { staticClass: "col-12" }, [_vm._v("Comments:")]),
-              _vm._v(" "),
-              _c("textarea", {
-                directives: [
-                  {
-                    name: "model",
-                    rawName: "v-model",
-                    value: _vm.reservation.comments,
-                    expression: "reservation.comments"
-                  }
-                ],
-                staticClass: "form-control",
-                attrs: { cols: "30", rows: "10" },
-                domProps: { value: _vm.reservation.comments },
-                on: {
-                  input: function($event) {
-                    if ($event.target.composing) {
-                      return
-                    }
-                    _vm.$set(_vm.reservation, "comments", $event.target.value)
-                  }
-                }
-              })
-            ])
-          ])
-        ])
-      : _vm._e(),
-    _vm._v(" "),
-    !_vm.sent
-      ? _c("div", { staticClass: "col-12 text-center" }, [
-          _c(
-            "button",
-            { staticClass: "btn btn-info", on: { click: _vm.sendReservation } },
-            [_vm._v("Submit")]
-          )
-        ])
-      : _vm._e(),
-    _vm._v(" "),
-    _vm.sent
-      ? _c("div", { staticClass: "col-12 messages" }, [
+    _c("div", { staticClass: "card-body" }, [
+      _c("div", { staticClass: "row" }, [
+        _c("div", { staticClass: "col-12 messages" }, [
           _vm.success
             ? _c("h4", { staticClass: "text-success" }, [
                 _vm._v(_vm._s(_vm.successMessage) + ".")
@@ -57591,9 +57490,157 @@ var render = function() {
           _vm._v(" "),
           _vm.error.status == true
             ? _c("h4", { staticClass: "text-danger" }, [
-                _vm._v(_vm._s(_vm.error.message) + ".")
+                _vm._v(_vm._s(_vm.error.message))
               ])
             : _vm._e()
+        ]),
+        _vm._v(" "),
+        !_vm.sent
+          ? _c("div", { staticClass: "row" }, [
+              _c(
+                "div",
+                { staticClass: "col-12 col-lg-4" },
+                [
+                  _c("label", [_vm._v("Date End:")]),
+                  _vm._v(" "),
+                  _c("datepicker", {
+                    model: {
+                      value: _vm.reservation.date,
+                      callback: function($$v) {
+                        _vm.$set(_vm.reservation, "date", $$v)
+                      },
+                      expression: "reservation.date"
+                    }
+                  })
+                ],
+                1
+              ),
+              _vm._v(" "),
+              _c(
+                "div",
+                { staticClass: "col-6 col-lg-4" },
+                [
+                  _c("label", { staticClass: "col-12" }, [
+                    _vm._v("Hour Start:")
+                  ]),
+                  _vm._v(" "),
+                  _c("vue-timepicker", {
+                    attrs: { format: "HH:mm", "minute-interval": 60 },
+                    model: {
+                      value: _vm.hour_start,
+                      callback: function($$v) {
+                        _vm.hour_start = $$v
+                      },
+                      expression: "hour_start"
+                    }
+                  })
+                ],
+                1
+              ),
+              _vm._v(" "),
+              _c(
+                "div",
+                { staticClass: "col-6 col-lg-4" },
+                [
+                  _c("label", { staticClass: "col-12" }, [_vm._v("Hour End:")]),
+                  _vm._v(" "),
+                  _c("vue-timepicker", {
+                    attrs: { format: "HH:mm", "minute-interval": 60 },
+                    model: {
+                      value: _vm.hour_end,
+                      callback: function($$v) {
+                        _vm.hour_end = $$v
+                      },
+                      expression: "hour_end"
+                    }
+                  })
+                ],
+                1
+              ),
+              _vm._v(" "),
+              _c(
+                "div",
+                { staticClass: "col-12" },
+                [
+                  _c("label", { staticClass: "col-12" }, [_vm._v("Service")]),
+                  _vm._v(" "),
+                  _c("dropdown", {
+                    attrs: { services: _vm.services },
+                    on: { sendItem: _vm.getService }
+                  })
+                ],
+                1
+              ),
+              _vm._v(" "),
+              _c("div", { staticClass: "col-12" }, [
+                _c("label", { staticClass: "col-12" }, [
+                  _vm._v("Customer Name:")
+                ]),
+                _vm._v(" "),
+                _c("input", {
+                  directives: [
+                    {
+                      name: "model",
+                      rawName: "v-model",
+                      value: _vm.reservation.customer_name,
+                      expression: "reservation.customer_name"
+                    }
+                  ],
+                  staticClass: "form-control",
+                  attrs: { type: "text" },
+                  domProps: { value: _vm.reservation.customer_name },
+                  on: {
+                    input: function($event) {
+                      if ($event.target.composing) {
+                        return
+                      }
+                      _vm.$set(
+                        _vm.reservation,
+                        "customer_name",
+                        $event.target.value
+                      )
+                    }
+                  }
+                })
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "col-12" }, [
+                _c("label", { staticClass: "col-12" }, [_vm._v("Comments:")]),
+                _vm._v(" "),
+                _c("textarea", {
+                  directives: [
+                    {
+                      name: "model",
+                      rawName: "v-model",
+                      value: _vm.reservation.comments,
+                      expression: "reservation.comments"
+                    }
+                  ],
+                  staticClass: "form-control",
+                  attrs: { cols: "30", rows: "10" },
+                  domProps: { value: _vm.reservation.comments },
+                  on: {
+                    input: function($event) {
+                      if ($event.target.composing) {
+                        return
+                      }
+                      _vm.$set(_vm.reservation, "comments", $event.target.value)
+                    }
+                  }
+                })
+              ])
+            ])
+          : _vm._e()
+      ])
+    ]),
+    _vm._v(" "),
+    !_vm.sent
+      ? _c("div", { staticClass: "col-12 text-center" }, [
+          _c(
+            "button",
+            { staticClass: "btn btn-info", on: { click: _vm.sendReservation } },
+            [_vm._v("Submit")]
+          )
         ])
       : _vm._e()
   ])

@@ -1,44 +1,46 @@
 <template>
     <div class="card">
-        <div class="card-body" v-if="!sent">
+        <div class="card-body">
             <div class="row">
-                <div class="col-12 col-lg-4">
-                    <label>Date End:</label>
-                    <datepicker v-model="reservation.date"></datepicker>
+                 <div class="col-12 messages">
+                    <h4 class="text-success" v-if="success">{{successMessage}}.</h4>
+                    <h4 class="text-danger" v-if="error.status == true">{{error.message}}</h4>
                 </div>
-                <div class="col-6 col-lg-4">
-                    <label class="col-12">Hour Start:</label>
-                    <vue-timepicker v-model="hour_start" format="HH:mm" :minute-interval="60" ></vue-timepicker>
-                </div>
-                <div class="col-6 col-lg-4">
-                    <label class="col-12">Hour End:</label>
-                    <vue-timepicker v-model="hour_end" format="HH:mm" :minute-interval="60" ></vue-timepicker>                
-                </div>
-                <div class="col-12">
-                    <label class="col-12">Service</label>
-                    <dropdown 
-                        v-on:sendItem="getService"
-                        :services="services">
-                    </dropdown>
-                </div>
-                <div class="col-12">
-                    <label class="col-12">Customer Name:</label>
-                    <input type="text" class="form-control" v-model="reservation.customer_name" />
-                </div>
-                <div class="col-12">
-                    <label class="col-12">Comments:</label>
-                    <textarea  class="form-control" cols="30" rows="10"
-                        v-model="reservation.comments">
-                    </textarea>
+                <div class="row" v-if="!sent">
+                    <div class="col-12 col-lg-4">
+                        <label>Date End:</label>
+                        <datepicker v-model="reservation.date"></datepicker>
+                    </div>
+                    <div class="col-6 col-lg-4">
+                        <label class="col-12">Hour Start:</label>
+                        <vue-timepicker v-model="hour_start" format="HH:mm" :minute-interval="60" ></vue-timepicker>
+                    </div>
+                    <div class="col-6 col-lg-4">
+                        <label class="col-12">Hour End:</label>
+                        <vue-timepicker v-model="hour_end" format="HH:mm" :minute-interval="60" ></vue-timepicker>                
+                    </div>
+                    <div class="col-12">
+                        <label class="col-12">Service</label>
+                        <dropdown 
+                            v-on:sendItem="getService"
+                            :services="services">
+                        </dropdown>
+                    </div>
+                    <div class="col-12">
+                        <label class="col-12">Customer Name:</label>
+                        <input type="text" class="form-control" v-model="reservation.customer_name" />
+                    </div>
+                    <div class="col-12">
+                        <label class="col-12">Comments:</label>
+                        <textarea  class="form-control" cols="30" rows="10"
+                            v-model="reservation.comments">
+                        </textarea>
+                    </div>
                 </div>
             </div>
         </div>
         <div class="col-12 text-center" v-if="!sent">
             <button class="btn btn-info" @click="sendReservation">Submit</button>
-        </div>
-        <div class="col-12 messages" v-if="sent">
-            <h4 class="text-success" v-if="success">{{successMessage}}.</h4>
-            <h4 class="text-danger" v-if="error.status == true">{{error.message}}.</h4>
         </div>
     </div>
 </template>
@@ -59,12 +61,12 @@
             return {
                 urlsendReservation:'http://localhost:8000/api/sendReservation',
                 hour_start: {
-                    HH: "",
-                    mm: "",
+                    HH: "08",
+                    mm: "00",
                 },
                 hour_end: {
-                    HH: "",
-                    mm: "",
+                    HH: "09",
+                    mm: "00",
                 },
                 reservation: {
                     date: null,
@@ -79,10 +81,10 @@
                 error: {
                     status: false,
                     message: ''
-                },
-                sent: false,
+                },               
                 success: false,
-                successMessage: ''
+                successMessage: '',
+                sent: false
             }
         },
         methods: {
@@ -90,6 +92,11 @@
             async sendReservation() {
                 this.formatHours();
                 this.reservation.date = this.formatDate(this.reservation.date);
+
+                if (this.checkDataForm()) {
+                    this.error.status = true;
+                    return null;
+                }
 
                 axios({
                     method: 'get',
@@ -134,6 +141,31 @@
                 this.error.status = status
                 this.error.message = message
             },
+            checkDataForm() {
+
+                let result = false;
+                 this.error.message = '';
+
+                if (this.reservation.customer_name == null ) {
+                    result = true
+                    this.error.message = 'Fill customer name';
+                }
+
+                 if (this.reservation.service_id == null ) {
+                    result = true
+                    this.error.message = 'Invalid Service';
+                }
+
+                
+
+                 if (this.reservation.date == null || this.reservation.date == 'Invalid date') {
+                    result = true
+                    this.error.message = 'Invalid date';
+                }
+
+                this.error.status = true;
+                return result;
+            }
         },
         components: {
             VueTimepicker,
